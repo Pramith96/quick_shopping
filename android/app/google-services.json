@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "500225983851",
+    "firebase_url": "https://quick-shopping-4afe3.firebaseio.com",
+    "project_id": "quick-shopping-4afe3",
+    "storage_bucket": "quick-shopping-4afe3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500225983851:android:8945fe2cdab83be8c2f82e",
+        "android_client_info": {
+          "package_name": "com.pramith.quickshopping"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "500225983851-aarpc6shhgdp5cqub8moam1ofhh4f58g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhL0vCCZMz1p0PMffMzjpWuTywuMM9M8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "500225983851-aarpc6shhgdp5cqub8moam1ofhh4f58g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

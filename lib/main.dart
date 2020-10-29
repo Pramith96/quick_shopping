@@ -4,6 +4,7 @@ import 'package:quickshopping/Counters/bookQuentity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickshopping/separator/separator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Authentication/authentication.dart';
 import 'package:quickshopping/Config/config.dart';
@@ -17,6 +18,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   EcommerceApp.auth = FirebaseAuth.instance;
+  EcommerceApp.sharedPreferences = await SharedPreferences.getInstance();
+  EcommerceApp.firestore = FirebaseFirestore.instance;
   runApp(MyApp());
 }
 

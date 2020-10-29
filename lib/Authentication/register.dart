@@ -1,12 +1,13 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quickshopping/Store/storeHome.dart';
 import 'package:quickshopping/Widgets/cutomTextfield.dart';
 import 'package:quickshopping/DialogBox/errorDialog.dart';
 import 'package:quickshopping/DialogBox/loadingDialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../Store/storehome.dart';
 import 'package:quickshopping/Config/config.dart';
 
 class Register extends StatefulWidget {
@@ -21,7 +22,7 @@ class _RegisterState extends State<Register> {
       TextEditingController();
   final TextEditingController _passwordTextEditingControler =
       TextEditingController();
-  final TextEditingController _CPasswoedTextEditingControler =
+  final TextEditingController _CPasswordTextEditingControler =
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String userImageUrl = '';
@@ -40,7 +41,7 @@ class _RegisterState extends State<Register> {
               height: 10.0,
             ),
             InkWell(
-              onTap: () => print('selected'),
+              onTap: _selectAndPickImage,
               child: CircleAvatar(
                 radius: _screenWidth * 0.15,
                 backgroundColor: Colors.white,
@@ -76,7 +77,7 @@ class _RegisterState extends State<Register> {
                     isObsecure: true,
                   ),
                   CustomTextField(
-                    controller: _CPasswoedTextEditingControler,
+                    controller: _CPasswordTextEditingControler,
                     data: Icons.lock_outline,
                     hintText: 'Comfirm Password',
                     isObsecure: true,
@@ -85,7 +86,7 @@ class _RegisterState extends State<Register> {
               ),
             ),
             RaisedButton(
-              onPressed: () => ("clicked"),
+              onPressed: () { uploadAndSaveImage();},
               color: Colors.blueGrey,
               child: Text(
                 'Sign Up',
@@ -108,4 +109,103 @@ class _RegisterState extends State<Register> {
       ),
     );
   }
+
+ Future<void> _selectAndPickImage() async{
+  _imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+ }
+
+ Future<void> uploadAndSaveImage() async{
+   if(_imageFile == null){
+     showDialog(
+       context: context,
+       builder: (c){
+         return ErrorAlertDialog(message: 'Please select and image file');
+       }
+     );
+   } else {
+     _passwordTextEditingControler.text == _CPasswordTextEditingControler.text ?
+      _emailTextEditingControler.text.isNotEmpty && _nameTextEditingControler.text.isNotEmpty && _passwordTextEditingControler.text.isNotEmpty && _CPasswordTextEditingControler.text.isNotEmpty
+      ? uploadToStorage()
+
+      :displayDialog('Registation is not complete!!')
+
+      : displayDialog('Password do not match');
+
+   }
+ }
+ displayDialog(String msg){
+   showDialog(
+     context: context,
+     builder: (c){
+       return ErrorAlertDialog(message: msg);
+     }
+   );
+ }
+ uploadToStorage() async {
+   showDialog(
+     context: context,
+     builder: (c){
+       return LoadingAlertDialog(
+         message:'Registering, Please Wait....',
+       );
+     }
+   );
+   String imageFileName = DateTime.now().millisecondsSinceEpoch.toString();
+  //  StorageReference storageReference = FirebaseStorage.instance.ref().child(imageFileName);
+  firebase_storage.Reference storageReference = firebase_storage.FirebaseStorage.instance.ref().child(imageFileName);
+   //StorageUploadTask storageUploadTask = storageReference.putFile(_imageFile);
+  firebase_storage.UploadTask storageUploadTask = storageReference.putFile(_imageFile);
+   //StorageTaskSnapshot taskSnapshot = await storageUploadTask.onComplete;
+   firebase_storage.TaskSnapshot taskSnapshot = await storageUploadTask;
+   await taskSnapshot.ref.getDownloadURL().then((urlImage){
+     userImageUrl = urlImage;
+
+     _registerUser();
+   });
+ }
+ FirebaseAuth _auth = FirebaseAuth.instance;
+ void _registerUser() async{
+   User firebaseUser;
+   await _auth.createUserWithEmailAndPassword(
+     email: _emailTextEditingControler.text.trim(), 
+     password: _passwordTextEditingControler.text.trim()
+     ).then((auth) {
+       firebaseUser = auth.user;
+     }).catchError((error){
+       Navigator.pop(context);
+       showDialog(
+         context: context,
+         builder: (c){
+           return ErrorAlertDialog(message: error.message.toString(),);
+         }
+         );
+     }
+
+     );
+  if (firebaseUser != null){
+    saveUserInfoToFireStore(firebaseUser).then((value) {
+      Navigator.pop(context);
+      Route route = MaterialPageRoute(builder: (c) => StoreHome());
+      Navigator.pushReplacement(context, route);
+    });
+  }
+ }
+
+ Future saveUserInfoToFireStore(User fUser)async{
+   FirebaseFirestore.instance.collection('users').doc(fUser.uid).set(
+     {
+       'uid': fUser.uid,
+       'email': fUser.email,
+       'name': _nameTextEditingControler.text.trim(),
+       'url': userImageUrl,
+       EcommerceApp.userCartList: ['garbageValue'],
+     }
+   );
+
+   await EcommerceApp.sharedPreferences.setString(EcommerceApp.userUID, fUser.uid);
+   await EcommerceApp.sharedPreferences.setString(EcommerceApp.userEmail, fUser.email);
+   await EcommerceApp.sharedPreferences.setString(EcommerceApp.userName, _nameTextEditingControler.text);
+   await EcommerceApp.sharedPreferences.setString(EcommerceApp.userAvatarUrl, userImageUrl);
+   await EcommerceApp.sharedPreferences.setStringList(EcommerceApp.userCartList, ['garbageValue']);
+ }
 }

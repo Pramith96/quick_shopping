@@ -27,6 +27,7 @@ class _RegisterState extends State<Register> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String userImageUrl = '';
   File _imageFile;
+  String name = '';
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +35,7 @@ class _RegisterState extends State<Register> {
         _screenHeight = MediaQuery.of(context).size.height;
     return SingleChildScrollView(
       child: Container(
+        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -58,11 +60,11 @@ class _RegisterState extends State<Register> {
               key: _formKey,
               child: Column(
                 children: [
-                  CustomTextField(
-                    controller: _nameTextEditingControler,
-                    data: Icons.person,
-                    hintText: 'Name',
-                    isObsecure: false,
+                  TextFormField(
+                    onChanged: (val){
+                      setState(() => name = val);
+                    }
+        
                   ),
                   CustomTextField(
                     controller: _emailTextEditingControler,

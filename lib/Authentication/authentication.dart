@@ -31,7 +31,7 @@ class _AuthenticScreenState extends State<AuthenticScreen> {
             style: TextStyle(
               fontSize: 55.0,
               fontFamily: "Signatra",
-              color: Colors.blueGrey,
+              color: Colors.indigo[50],
             ),
           ),
           centerTitle: true,
